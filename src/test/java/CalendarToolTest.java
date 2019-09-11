@@ -8,6 +8,11 @@ import org.junit.Test;
 
 public class CalendarToolTest {
 
+    /**
+     *  { 1, 2, "a"}
+     *  { 3, 4, "b"}
+     *  { 6, 7, "c"}
+     */
     @Test
     public void testNoConflict() {
         List<Event> events = Arrays.asList(
@@ -20,10 +25,18 @@ public class CalendarToolTest {
         Assert.assertThat(conflicts.size(), is(0));
     }
 
+
+    /**
+     *  { 1, 2, "a"}
+     *  { 3, 4, "b"}
+     *  { 6, 7, "c"}
+     *  { 7, 14, "d"} ┐ conflicting
+     *  { 7, 15, "e"} ┘ events
+     */
     @Test
     public void testSingleConflict() {
-        Event conflictingEvent1FromSequence1 = new Event(7, 14, "b");
-        Event conflictingEvent2FromSequence1 = new Event(7, 15, "b");
+        Event conflictingEvent1FromSequence1 = new Event(7, 14, "d");
+        Event conflictingEvent2FromSequence1 = new Event(7, 15, "e");
         List<Event> events = Arrays.asList(
                 new Event(1, 2, "a"),
                 new Event(3, 4, "b"),
@@ -41,6 +54,14 @@ public class CalendarToolTest {
         Assert.assertThat(conflictSet1, CoreMatchers.hasItems(conflictingEvent1FromSequence1, conflictingEvent2FromSequence1));
     }
 
+    /**
+     *  { 1, 2, "a"}
+     *  { 3, 4, "b"}
+     *  { 7, 10, "e"}  ┐conflicting
+     *  { 8, 11, "d"}  │events set
+     *  { 10, 12, "f"} ┘
+     *  { 13, 14, "x"}
+     */
     @Test
     public void testSequenceConflict() {
         Event conflictingEvent1FromSequence1 = new Event(7, 10, "e");
@@ -66,19 +87,29 @@ public class CalendarToolTest {
                 conflictingEvent3FromSequence1));
     }
 
+    /**
+     *  { 1, 2, "a"}
+     *  { 3, 5, "b"}   ┐conflicting
+     *  { 4, 6, "c"}   ┘events set #1
+     *  { 7, 10, "d"}  ┐conflicting
+     *  { 8, 11, "e"}  │events set #2
+     *  { 10, 12, "f"} ┘
+     *  { 13, 14, "g"} ┐conflicting
+     *  { 13, 14, "h"} ┘events set #3
+     */
     @Test
     public void testComplexConflict() {
         List<Event> events = Arrays.asList(
                 new Event(1, 2, "a"),
-                new Event(3, 5, "b conflict#1"),
-                new Event(4, 6, "c conflict#1"),
+                new Event(3, 5, "b"),
+                new Event(4, 6, "c"),
 
-                new Event(7, 10, "d conflict#2"),
-                new Event(8, 11, "e conflict#2"),
-                new Event(10, 12, "f conflict#2"),
+                new Event(7, 10, "d"),
+                new Event(8, 11, "e"),
+                new Event(10, 12, "f"),
 
-                new Event(13, 14, "g conflict#3"),
-                new Event(13, 14, "h conflict#3"));
+                new Event(13, 14, "g"),
+                new Event(13, 14, "h"));
 
         List<List<Event>> conflicts = CalendarTool.findConflicts(events);
 
